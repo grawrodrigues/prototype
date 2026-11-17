@@ -1,25 +1,9 @@
-const NAME_LIMIT = 60;
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { supabaseKey, supabaseUrl } from "./supabase-config.js";
 
-const conditions = [
-  {
-    id: "preco",
-    name: "Mencionar preço ou orçamento",
-    description:
-      'Acionar caso o cliente pergunte sobre orçamento, queira saber o preço, passe uma lista de itens e queira saber o valor. Ex: "Quero um orçamento para esses itens"',
-    updated: "13/11/2026 às 23:45",
-    editor: "Cláudia",
-    flows: ["Atendimento especializado", "Compra de produtos"],
-  },
-  {
-    id: "compra",
-    name: "Houver intenção de compra",
-    description:
-      "Se o contato mandar mensagens que demonstre interesse em fazer negociação. Utilize palavras similiares a comprar ou falar com o vendedor, comercial.",
-    updated: "13/02/2025 às 18:00",
-    editor: "Gilson",
-    flows: ["Atendimento especializado"],
-  },
-];
+const NAME_LIMIT = 60;
+const supabase = createClient(supabaseUrl, supabaseKey);
+const conditions = [];
 
 const body = document.querySelector("#conditions");
 const empty = document.querySelector("#empty");
@@ -33,6 +17,7 @@ const nameInput = document.querySelector("#condition-name");
 const descriptionInput = document.querySelector("#condition-description");
 const counter = document.querySelector("#name-counter");
 const saveButton = document.querySelector("#save-condition");
+const saveError = document.querySelector("#save-error");
 const form = document.querySelector("#condition-form");
 const overlay = document.querySelector("#overlay");
 const deleteDialog = document.querySelector("#delete-dialog");
@@ -45,11 +30,47 @@ let editingId = null;
 let flowsConditionId = null;
 let deleteConditionId = null;
 let deleteTrigger = null;
+let saving = false;
 
-function formatNow() {
-  const date = new Date();
-  const pad = (value) => String(value).padStart(2, "0");
+function formatTimestamp(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  const pad = (part) => String(part).padStart(2, "0");
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} às ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function mapCondition(row) {
+  return {
+    id: row.id,
+    name: row.nome,
+    description: row.descricao,
+    updated: formatTimestamp(row.atualizado_em),
+    editor: row.editado_por,
+    flows: row.fluxos ?? [],
+  };
+}
+
+function showSaveError(message) {
+  saveError.textContent = message;
+  saveError.hidden = !message;
+}
+
+async function loadConditions() {
+  const { data, error } = await supabase
+    .from("condicoes_de_saida")
+    .select("id, nome, descricao, editado_por, atualizado_em, fluxos")
+    .order("atualizado_em", { ascending: false });
+
+  if (error) {
+    conditions.splice(0, conditions.length);
+    render();
+    empty.hidden = false;
+    empty.textContent = "Não foi possível carregar as condições.";
+    return;
+  }
+
+  empty.textContent = "Nenhuma condição encontrada.";
+  conditions.splice(0, conditions.length, ...data.map(mapCondition));
+  render();
 }
 
 function visibleConditions() {
@@ -227,6 +248,7 @@ function updateCounter() {
 function openCreate(condition, trigger) {
   flowsConditionId = null;
   closeDrawer(flowsDrawer);
+  showSaveError("");
   editingId = condition ? condition.id : null;
   nameInput.value = condition ? condition.name : "";
   descriptionInput.value = condition ? condition.description : "";
@@ -302,31 +324,44 @@ nameInput.addEventListener("input", () => {
 
 descriptionInput.addEventListener("input", updateSaveState);
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const name = nameInput.value.trim();
   const description = descriptionInput.value.trim();
-  if (!name || !description) return;
+  if (!name || !description || saving) return;
+
+  showSaveError("");
 
   if (editingId) {
     const condition = conditions.find((item) => item.id === editingId);
     if (condition) {
       condition.name = name;
       condition.description = description;
-      condition.updated = formatNow();
+      condition.updated = formatTimestamp(new Date());
       condition.editor = "Cláudia";
     }
-  } else {
-    conditions.unshift({
-      id: `condicao-${Date.now()}`,
-      name,
-      description,
-      updated: formatNow(),
-      editor: "Cláudia",
-      flows: [],
-    });
+    editingId = null;
+    closeDrawer(createDrawer);
+    render();
+    return;
   }
 
+  saving = true;
+  saveButton.disabled = true;
+  const { data, error } = await supabase
+    .from("condicoes_de_saida")
+    .insert({ nome: name, descricao: description })
+    .select("id, nome, descricao, editado_por, atualizado_em, fluxos")
+    .single();
+  saving = false;
+  updateSaveState();
+
+  if (error || !data) {
+    showSaveError("Não foi possível salvar a condição. Tente de novo.");
+    return;
+  }
+
+  conditions.unshift(mapCondition(data));
   editingId = null;
   closeDrawer(createDrawer);
   render();
@@ -387,4 +422,4 @@ window.addEventListener("resize", () => {
   if (!menu.hidden && menuTrigger) openMenu(menuTrigger, menuConditionId);
 });
 
-render();
+loadConditions();
