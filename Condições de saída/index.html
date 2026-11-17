@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Condições de saída — RD Atendimento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Nunito+Sans:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="product">
+          <img src="assets/logo.svg" width="220" height="32" alt="RD Atendimento" />
+          <span class="product-chevron" aria-hidden="true">
+            <img src="assets/chevron-down.svg" width="20" height="20" alt="" />
+          </span>
+        </div>
+        <div class="topbar-end">
+          <div class="top-icons" aria-hidden="true">
+            <span class="top-icon"><img src="assets/nav-h1.svg" width="24" height="24" alt="" /></span>
+            <span class="top-icon"><img src="assets/nav-h2.svg" width="24" height="24" alt="" /></span>
+            <span class="top-icon"><img src="assets/nav-h3.svg" width="24" height="24" alt="" /></span>
+            <span class="top-icon has-badge"><img src="assets/nav-h4.svg" width="24" height="24" alt="" /></span>
+            <span class="top-icon"><img src="assets/nav-h5.svg" width="24" height="24" alt="" /></span>
+          </div>
+          <img class="top-divider" src="assets/divider.svg" width="32" height="1" alt="" />
+          <div class="account">
+            <span class="avatar">
+              <img src="assets/totvs.png" alt="" />
+            </span>
+            <span class="account-name">Agência RD</span>
+            <img src="assets/chevron-down.svg" width="20" height="20" alt="" />
+          </div>
+        </div>
+      </header>
+
+      <div class="shell">
+        <nav class="sidenav" aria-label="Menu principal">
+          <button class="side-item" type="button" data-label="Início">
+            <span class="side-icon"><img src="assets/nav-home.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Contatos">
+            <span class="side-icon"><img src="assets/side-contacts.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Mensagens">
+            <span class="side-icon has-badge"><img src="assets/side-messages.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Campanhas">
+            <span class="side-icon"><img src="assets/side-campaigns.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Automação">
+            <span class="side-icon"><img src="assets/side-automation.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Funil">
+            <span class="side-icon"><img src="assets/side-funnel.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item" type="button" data-label="Relatórios">
+            <span class="side-icon"><img src="assets/side-reports.svg" width="24" height="24" alt="" /></span>
+          </button>
+          <button class="side-item is-active" type="button" data-label="Agent Builder" aria-current="page">
+            <span class="side-icon"><img src="assets/side-agents.svg" width="24" height="24" alt="" /></span>
+            <span class="active-marker" aria-hidden="true"></span>
+          </button>
+        </nav>
+
+        <main class="panel">
+          <div class="page">
+            <header class="page-header">
+              <div class="page-title-row">
+                <h1>Condições de saída</h1>
+                <button class="btn btn-primary" type="button" id="create-condition">Criar condição</button>
+              </div>
+              <p class="page-description">
+                Regras de transbordo ou encerramento que definem quando um Agente deve sair do fluxo automático e realizar uma ação, como transferir a conversa para um atendente humano ou encaminhar para outra ferramenta.
+              </p>
+            </header>
+
+            <form class="filters" role="search" id="search-form">
+              <label class="search">
+                <span class="live">Buscar pelo nome</span>
+                <input id="search" type="search" placeholder="Buscar pelo nome" autocomplete="off" />
+                <button class="search-button" type="submit" aria-label="Buscar">
+                  <img src="assets/loupe.svg" width="20" height="20" alt="" />
+                </button>
+              </label>
+            </form>
+
+            <div class="table-wrap">
+              <table>
+                <colgroup>
+                  <col />
+                  <col class="col-updated" />
+                  <col class="col-editor" />
+                  <col class="col-action" />
+                  <col class="col-action" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Sair do agente quando</th>
+                    <th scope="col">Última atualização</th>
+                    <th scope="col">Editado por</th>
+                    <th scope="col"><span class="live">Editar</span></th>
+                    <th scope="col"><span class="live">Mais ações</span></th>
+                  </tr>
+                </thead>
+                <tbody id="conditions"></tbody>
+              </table>
+              <p class="empty" id="empty" hidden>Nenhuma condição encontrada.</p>
+              <div class="pagination">
+                <button class="page-btn" type="button" disabled>Anterior</button>
+                <button class="page-btn is-current" type="button" disabled>1</button>
+                <button class="page-btn is-next" type="button">Próximo</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay" aria-hidden="true"></div>
+
+    <div class="menu" id="row-menu" role="menu" hidden>
+      <button class="menu-item" type="button" role="menuitem" data-menu="flows">Fluxos ativos</button>
+      <span class="menu-divider" role="separator"></span>
+      <button class="menu-item" type="button" role="menuitem" data-menu="delete">Excluir condição</button>
+    </div>
+
+    <aside
+      class="drawer"
+      id="drawer-flows"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="flows-title"
+      aria-hidden="true"
+      inert
+    >
+      <header class="drawer-header">
+        <h2 id="flows-title">Fluxos ativos</h2>
+        <button class="icon-btn" type="button" data-close="flows" aria-label="Fechar">
+          <img src="assets/times.svg" width="24" height="24" alt="" />
+        </button>
+      </header>
+      <div class="drawer-body">
+        <p class="flows-intro" id="flows-intro"></p>
+        <ul class="flow-list" id="flow-list"></ul>
+      </div>
+      <footer class="drawer-footer">
+        <button class="btn btn-secondary" type="button" data-close="flows">Fechar</button>
+      </footer>
+    </aside>
+
+    <aside
+      class="drawer"
+      id="drawer-create"
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="create-title"
+      aria-hidden="true"
+      inert
+    >
+      <header class="drawer-header">
+        <h2 id="create-title">Criar condição</h2>
+        <button class="icon-btn" type="button" data-close="create" aria-label="Fechar">
+          <img src="assets/times.svg" width="24" height="24" alt="" />
+        </button>
+      </header>
+      <form class="drawer-body" id="condition-form">
+        <div class="field">
+          <label for="condition-name">Sair do agente quando</label>
+          <div class="input-shell">
+            <input
+              id="condition-name"
+              name="name"
+              type="text"
+              maxlength="60"
+              placeholder="Ex: Houver interesse de compra"
+              autocomplete="off"
+            />
+            <span class="counter" id="name-counter" aria-live="polite">60</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="condition-description">Descreva a situação que encerra o atendimento do agente</label>
+          <div class="textarea-shell">
+            <textarea
+              id="condition-description"
+              name="description"
+              placeholder="Ex: Se o contato mandar mensagens que demonstre interesse em fazer negociação. Utilize palavras similiares a comprar ou falar com o vendedor, comercial."
+            ></textarea>
+            <img class="corner" src="assets/corner.svg" width="6.70711" height="6.70711" alt="" />
+          </div>
+          <p class="hint">Explique quando a saída do agente acontece e inclua exemplos.</p>
+        </div>
+      </form>
+      <footer class="drawer-footer">
+        <div class="button-group" role="group" aria-label="Ações da condição">
+          <button class="btn btn-secondary" type="button" data-close="create">Cancelar</button>
+          <button class="btn btn-save" type="submit" form="condition-form" id="save-condition" disabled>Salvar</button>
+        </div>
+      </footer>
+    </aside>
+
+    <div
+      class="dialog"
+      id="delete-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-title"
+      aria-describedby="delete-text"
+      hidden
+    >
+      <div class="dialog-header">
+        <h2 id="delete-title">Excluir condição de saída</h2>
+        <button class="icon-btn" type="button" data-dialog-close aria-label="Fechar">
+          <img src="assets/dialog-times.svg" width="24" height="24" alt="" />
+        </button>
+      </div>
+      <p id="delete-text">
+        Ao excluir, essa condição de saída deixa de funcionar nos agentes. Revise os agentes que dependem dela.
+      </p>
+      <div class="dialog-actions" role="group" aria-label="Confirmar exclusão">
+        <button class="btn btn-secondary" type="button" data-dialog-close>Cancelar</button>
+        <button class="btn btn-danger" type="button" id="confirm-delete">Excluir</button>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
