@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Nunito+Sans:wght@400;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
   </head>
   <body>
     <div class="app">
@@ -63,10 +63,22 @@
           <button class="side-item" type="button" data-label="Relatórios">
             <span class="side-icon"><img src="assets/side-reports.svg" width="24" height="24" alt="" /></span>
           </button>
-          <button class="side-item is-active" type="button" data-label="Agent Builder" aria-current="page">
-            <span class="side-icon"><img src="assets/side-agents.svg" width="24" height="24" alt="" /></span>
-            <span class="active-marker" aria-hidden="true"></span>
-          </button>
+          <div class="side-slot">
+            <button class="side-item is-active" type="button" aria-current="page" aria-haspopup="true" aria-controls="agent-menu">
+              <span class="side-icon"><img src="assets/side-agents.svg" width="24" height="24" alt="" /></span>
+              <span class="active-marker" aria-hidden="true"></span>
+            </button>
+            <div class="agent-menu" id="agent-menu">
+              <div class="agent-menu-card">
+                <p class="agent-menu-title">Agentes de IA</p>
+                <button class="agent-menu-item" type="button">
+                  Criador de Agentes
+                  <img src="assets/external.svg" width="16" height="16" alt="" />
+                </button>
+                <a class="agent-menu-item" href="./" aria-current="page">Condições de saída</a>
+              </div>
+            </div>
+          </div>
         </nav>
 
         <main class="panel">
@@ -231,6 +243,6 @@
       </div>
     </div>
 
-    <script type="module" src="app.js?v=3"></script>
+    <script type="module" src="app.js?v=4"></script>
   </body>
 </html>

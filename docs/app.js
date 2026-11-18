@@ -13,6 +13,8 @@ const flowsDrawer = document.querySelector("#drawer-flows");
 const createDrawer = document.querySelector("#drawer-create");
 const flowsIntro = document.querySelector("#flows-intro");
 const flowList = document.querySelector("#flow-list");
+const createTitle = document.querySelector("#create-title");
+const deleteText = document.querySelector("#delete-text");
 const nameInput = document.querySelector("#condition-name");
 const descriptionInput = document.querySelector("#condition-description");
 const counter = document.querySelector("#name-counter");
@@ -174,6 +176,9 @@ function closeDrawer(drawer) {
 function openDelete(condition, trigger) {
   deleteConditionId = condition.id;
   deleteTrigger = trigger;
+  deleteText.textContent = condition.flows.length
+    ? "Seus fluxos ativos continuam funcionando normalmente, mas os agentes deixam de seguir essa regra."
+    : "Tem certeza que gostaria de excluir?";
   deleteDialog.hidden = false;
   syncOverlay();
   deleteDialog.querySelector("[data-dialog-close]").focus();
@@ -250,6 +255,7 @@ function openCreate(condition, trigger) {
   closeDrawer(flowsDrawer);
   showSaveError("");
   editingId = condition ? condition.id : null;
+  createTitle.textContent = editingId ? "Editar condição" : "Criar condição";
   nameInput.value = condition ? condition.name : "";
   descriptionInput.value = condition ? condition.description : "";
   updateCounter();
