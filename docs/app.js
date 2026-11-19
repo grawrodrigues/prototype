@@ -2,6 +2,12 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 import { supabaseKey, supabaseUrl } from "./supabase-config.js";
 
 const NAME_LIMIT = 60;
+const SYSTEM_NAMES = [
+  "Acontecer um erro",
+  "Identificar irritabilidade",
+  "Contato encerrar a conversa",
+  "Solicitar atendimento humano",
+];
 const supabase = createClient(supabaseUrl, supabaseKey);
 const conditions = [];
 
@@ -18,6 +24,8 @@ const deleteText = document.querySelector("#delete-text");
 const nameInput = document.querySelector("#condition-name");
 const descriptionInput = document.querySelector("#condition-description");
 const counter = document.querySelector("#name-counter");
+const nameError = document.querySelector("#name-error");
+const nameShell = nameInput.closest(".input-shell");
 const saveButton = document.querySelector("#save-condition");
 const saveError = document.querySelector("#save-error");
 const form = document.querySelector("#condition-form");
@@ -177,7 +185,7 @@ function openDelete(condition, trigger) {
   deleteConditionId = condition.id;
   deleteTrigger = trigger;
   deleteText.textContent = condition.flows.length
-    ? "Seus fluxos ativos continuam funcionando normalmente, mas os agentes deixam de seguir essa regra."
+    ? "Seus fluxos ativos não são interrompidos. Ao excluir essa condição, a etapa sai do fluxo automaticamente e os agentes deixam de direcionar contatos por ela. Deseja seguir com a exclusão?"
     : "Tem certeza que gostaria de excluir?";
   deleteDialog.hidden = false;
   syncOverlay();
@@ -241,9 +249,40 @@ function openFlows(condition, trigger) {
   flowsDrawer.querySelector("[data-close]").focus();
 }
 
+function normalizeName(value) {
+  return value.trim().replace(/\s+/g, " ").toLowerCase();
+}
+
+function nameValidationMessage(value) {
+  const normalized = normalizeName(value);
+  if (!normalized) return "";
+  if (SYSTEM_NAMES.some((name) => normalizeName(name) === normalized)) {
+    return "Esse nome é um padrão do sistema. Escolha outro nome.";
+  }
+  const duplicate = conditions.some(
+    (condition) => condition.id !== editingId && normalizeName(condition.name) === normalized
+  );
+  if (duplicate) return "Já existe uma condição com esse nome. Escolha outro nome.";
+  return "";
+}
+
+function updateNameValidation() {
+  const message = nameValidationMessage(nameInput.value);
+  nameError.textContent = message;
+  nameError.hidden = !message;
+  nameShell.classList.toggle("is-invalid", Boolean(message));
+  nameInput.setAttribute("aria-invalid", message ? "true" : "false");
+  if (message) nameInput.setAttribute("aria-describedby", "name-error");
+  else nameInput.removeAttribute("aria-describedby");
+  return !message;
+}
+
 function updateSaveState() {
-  const ready = nameInput.value.trim().length > 0 && descriptionInput.value.trim().length > 0;
-  saveButton.disabled = !ready;
+  const ready =
+    nameInput.value.trim().length > 0 &&
+    descriptionInput.value.trim().length > 0 &&
+    !nameValidationMessage(nameInput.value);
+  saveButton.disabled = !ready || saving;
 }
 
 function updateCounter() {
@@ -259,6 +298,7 @@ function openCreate(condition, trigger) {
   nameInput.value = condition ? condition.name : "";
   descriptionInput.value = condition ? condition.description : "";
   updateCounter();
+  updateNameValidation();
   updateSaveState();
   openDrawer(createDrawer, trigger);
   nameInput.focus();
@@ -325,6 +365,7 @@ document.querySelector("#search-form").addEventListener("submit", (event) => {
 
 nameInput.addEventListener("input", () => {
   updateCounter();
+  updateNameValidation();
   updateSaveState();
 });
 
@@ -332,9 +373,9 @@ descriptionInput.addEventListener("input", updateSaveState);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const name = nameInput.value.trim();
+  const name = nameInput.value.trim().replace(/\s+/g, " ");
   const description = descriptionInput.value.trim();
-  if (!name || !description || saving) return;
+  if (!name || !description || saving || !updateNameValidation()) return;
 
   showSaveError("");
 

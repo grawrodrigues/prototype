@@ -837,6 +837,11 @@ td {
   border-color: var(--link);
 }
 
+.input-shell.is-invalid,
+.input-shell.is-invalid:focus-within {
+  border-color: var(--badge);
+}
+
 .input-shell {
   height: 40px;
   padding: 4px 12px;
@@ -898,6 +903,10 @@ td {
   font-weight: 500;
   line-height: 1.4;
   letter-spacing: -0.14px;
+}
+
+.field .form-error {
+  margin: 0;
 }
 
 .form-error {
